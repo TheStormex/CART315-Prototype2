@@ -10,7 +10,7 @@ public class wizard : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        hp = maxHp;
+       // hp = maxHp;
     }
 
     // Update is called once per frame
