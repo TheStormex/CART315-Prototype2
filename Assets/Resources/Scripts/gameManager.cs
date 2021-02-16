@@ -112,6 +112,7 @@ public class gameManager : MonoBehaviour
                 // if is the only one left, win
                 if (yellowHealth > 0 && wizardsList.Count == 1)
                 {
+                    win = true;
                     SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
                 }
                 break;
@@ -133,6 +134,7 @@ public class gameManager : MonoBehaviour
                 // if is the only one left, win
                 if (blueHealth > 0 && wizardsList.Count == 1)
                 {
+                    win = true;
                     SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
                 }
                 break;
@@ -154,6 +156,7 @@ public class gameManager : MonoBehaviour
                 // if is the only one left, win
                 if (redHealth > 0 && wizardsList.Count == 1)
                 {
+                    win = true;
                     SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
                 }
                 break;
@@ -161,21 +164,18 @@ public class gameManager : MonoBehaviour
         // if a wizard would die, remove it from the game
         if (yellowHealth <= 0 && yellowWizardAlive == true)
         {
-            Debug.Log("yellow"+ yellowHealth);
             yellowWizardAlive = false;
             wizardToRemove = "Yellow Wizard";
             BodyDestroy();
         }
         if (blueHealth <= 0 && blueWizardAlive == true)
         {
-            Debug.Log("blue" + blueHealth);
             blueWizardAlive = false;
             wizardToRemove = "Blue Wizard";
             BodyDestroy();
         }
         if (redHealth <= 0 && redWizardAlive == true)
         {
-            Debug.Log("red" + redHealth);
             redWizardAlive = false;
             wizardToRemove = "Red Wizard";
             BodyDestroy();
@@ -192,12 +192,14 @@ public class gameManager : MonoBehaviour
                         if (blueWizardAlive == true)
                         {
                             blueHealth -= yellowAbilitiesInfo[0];
+                            NextTurn();
                         }
                         break;
                     case 1:
                         if (redWizardAlive == true)
                         {
                             redHealth -= yellowAbilitiesInfo[0];
+                            NextTurn();
                         }
                         break;
                     case 2:
@@ -209,9 +211,15 @@ public class gameManager : MonoBehaviour
                         {
                             redHealth -= yellowAbilitiesInfo[1];
                         }
+                        NextTurn();
                         break;
                     case 3:
                         yellowHealth += yellowAbilitiesInfo[2];
+                        if (yellowHealth >= yellowMaxHealth)
+                        {
+                            yellowHealth = yellowMaxHealth;
+                        }
+                        NextTurn();
                         break;
                 }
                 break;
@@ -222,12 +230,14 @@ public class gameManager : MonoBehaviour
                         if (yellowWizardAlive == true)
                         {
                             yellowHealth -= blueAbilitiesInfo[0];
+                            NextTurn();
                         }
                         break;
                     case 1:
                         if (redWizardAlive == true)
                         {
                             redHealth -= blueAbilitiesInfo[0];
+                            NextTurn();
                         }
                         break;
                     case 2:
@@ -239,6 +249,7 @@ public class gameManager : MonoBehaviour
                         {
                             redHealth -= blueAbilitiesInfo[1];
                         }
+                        NextTurn();
                         break;
                     case 3:
                         blueHealth += blueAbilitiesInfo[2];
@@ -246,6 +257,7 @@ public class gameManager : MonoBehaviour
                         {
                             blueHealth = blueMaxHealth;
                         }
+                        NextTurn();
                         break;
                 }
                   break;
@@ -256,12 +268,14 @@ public class gameManager : MonoBehaviour
                         if (yellowWizardAlive == true)
                         {
                             yellowHealth -= redAbilitiesInfo[0];
+                            NextTurn();
                         }
                         break;
                     case 1:
                         if (blueWizardAlive == true)
                         {
                             blueHealth -= redAbilitiesInfo[0];
+                            NextTurn();
                         }
                         break;
                     case 2:
@@ -273,6 +287,7 @@ public class gameManager : MonoBehaviour
                         {
                             blueHealth -= redAbilitiesInfo[1];
                         }
+                        NextTurn();
                         break;
                     case 3:
                         redHealth += redAbilitiesInfo[2];
@@ -280,12 +295,12 @@ public class gameManager : MonoBehaviour
                         {
                             redHealth = redMaxHealth;
                         }
+                        NextTurn();
                         break;
                 }
                 break;
 
          }
-        NextTurn();
     }
     public void NextTurn()
     {
@@ -300,7 +315,6 @@ public class gameManager : MonoBehaviour
     }
     public void BodyDestroy()
     {
-        Debug.Log("oldCount"+wizardsList.Count);
         switch (wizardToRemove)
         {
             case "Yellow Wizard":
@@ -340,8 +354,6 @@ public class gameManager : MonoBehaviour
                 }
                 break;
         }
-        Debug.Log("index"+wizardIndex);
         wizardsList.RemoveAt(wizardIndex);
-        Debug.Log("newCount"+wizardsList.Count);
     }
 }
