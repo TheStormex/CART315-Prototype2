@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class gameManager : MonoBehaviour
@@ -20,27 +22,25 @@ public class gameManager : MonoBehaviour
   //  public int blueDamageOutgoing = 100;
   //  public int blueDamageIncoming = 100;
 
-    public int turnsBeforeChange = 2;
     public string nextBody = "This wizard";
     public string currentBody;
-    public string[] bodyCycle;
     public int currentBodyNumber;
-    // active character (ploayer or computer)
-    public string activeChar;
-    public string[] wizardsList = { "Yellow Wizard", "Blue Wizard", "Red Wizard"};
+    // all wizard characters, if one is dead, the list is recreated without it. (trying the list type)
+    List<string> wizardsList = new List<string>();
+    public string wizardToRemove;
     public static bool win = true;
+    int wizardIndex;
+    int nextBodyNumber;
+    bool redWizardAlive = true;
+    bool blueWizardAlive = true;
+    bool yellowWizardAlive = true;
     // wizard abilities
-    string[] yellowAbilitiesNames = { "Rock Throw", "Mudslide"};
-    string[] blueAbilitiesNames = { "Water Blast", "Tsunami"};
-    string[] redAbilitiesNames = { "Fireball", "Heat Wave"};
-    int[] yellowAbilitiesInfo = {5, 3};
-    int[] blueAbilitiesInfo = {4, 4};
-    int[] redAbilitiesInfo = {6, 2};
-    // timer for explanation before effects happen
-    float timer = 1.5f;
-    float timerLimit = 1.5f;
-    // phases of turns: 0 - choosing ability (player is active); 1 - explain what will happen; 2 - the effect happens.
-    int phases = 0;
+    string[] yellowAbilitiesNames = { "Rock Throw", "Mudslide", "Earthen Restoration"};
+    string[] blueAbilitiesNames = { "Water Blast", "Tsunami", "River's Cleansing"};
+    string[] redAbilitiesNames = { "Fireball", "Heat Wave", "Solar Warmth"};
+    int[] yellowAbilitiesInfo = {2, 5, 3};
+    int[] blueAbilitiesInfo = {3, 2, 5};
+    int[] redAbilitiesInfo = {5, 3, 2};
 
     // references
     public Text yellowHealthText;
@@ -54,14 +54,22 @@ public class gameManager : MonoBehaviour
     public Text abilityButtonOneText;
     public Text abilityButtonTwoText;
     public Text abilityButtonThreeText;
+    public Text abilityButtonFourText;
     public Text abilityButtonOneInfo;
     public Text abilityButtonTwoInfo;
     public Text abilityButtonThreeInfo;
+    public Text abilityButtonFourInfo;
     public Text infoText;
+    public Object redWizardObject;
+    public Object blueWizardObject;
+    public Object yellowWizardObject;
 
     // Start is called before the first frame update
     void Start()
     {
+        wizardsList.Add("Yellow Wizard");
+        wizardsList.Add("Blue Wizard");
+        wizardsList.Add("Red Wizard");
         // start in a random body
         currentBodyNumber = Random.Range(0, 3);
         currentBody = wizardsList[currentBodyNumber];
@@ -79,147 +87,261 @@ public class gameManager : MonoBehaviour
         yellowHealthText.text = yellowHealth.ToString() + " / " + yellowMaxHealth.ToString();
         blueHealthText.text = blueHealth.ToString() + " / " + blueMaxHealth.ToString();
         redHealthText.text = redHealth.ToString() + " / " + redMaxHealth.ToString();
-        nextBodyText.text = "You'll possess " + nextBody + " in " + turnsBeforeChange + " turns.";
+        nextBodyText.text = "You'll possess " + nextBody + " next turn.";
         currentWizardText.text = currentBody;
         yellowHealthSlider.value = (float)yellowHealth / (float)yellowMaxHealth;
         blueHealthSlider.value = (float)blueHealth / (float)blueMaxHealth;
         redHealthSlider.value = (float)redHealth / (float)redMaxHealth;
-        Debug.Log(timer);
         switch (currentBody)
         {
             case "Yellow Wizard":
                 abilityButtonOneText.text = yellowAbilitiesNames[0] + " towards Blue Wizard";
                 abilityButtonTwoText.text = yellowAbilitiesNames[0] + " towards Red Wizard";
                 abilityButtonThreeText.text = yellowAbilitiesNames[1];
+                abilityButtonFourText.text = yellowAbilitiesNames[2];
                 abilityButtonOneInfo.text = "Deal " + yellowAbilitiesInfo[0].ToString() + " Damage to Blue Wizard";
                 abilityButtonTwoInfo.text = "Deal " + yellowAbilitiesInfo[0].ToString() + " Damage to Red Wizard";
                 abilityButtonThreeInfo.text = "Deal " + yellowAbilitiesInfo[1].ToString() + " Damage to all others";
+                abilityButtonFourInfo.text = "Heal Self for " + yellowAbilitiesInfo[2].ToString();
+                // if the player would die, lose
+                if (yellowHealth <= 0)
+                {
+                    win = false;
+                    SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
+                }
+                // if is the only one left, win
+                if (yellowHealth > 0 && wizardsList.Count == 1)
+                {
+                    SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
+                }
                 break;
             case "Blue Wizard":
                 abilityButtonOneText.text = blueAbilitiesNames[0] + " towards Yellow Wizard";
                 abilityButtonTwoText.text = blueAbilitiesNames[0] + " towards Red Wizard";
                 abilityButtonThreeText.text = blueAbilitiesNames[1];
+                abilityButtonFourText.text = blueAbilitiesNames[2];
                 abilityButtonOneInfo.text = "Deal " + blueAbilitiesInfo[0].ToString() + " Damage to Yellow Wizard";
                 abilityButtonTwoInfo.text = "Deal " + blueAbilitiesInfo[0].ToString() + " Damage to Red Wizard";
                 abilityButtonThreeInfo.text = "Deal " + blueAbilitiesInfo[1].ToString() + " Damage to all others";
+                abilityButtonFourInfo.text = "Heal Self for " + blueAbilitiesInfo[2].ToString();
+                // if the player would die, lose
+                if (blueHealth <= 0)
+                {
+                    win = false;
+                    SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
+                }
+                // if is the only one left, win
+                if (blueHealth > 0 && wizardsList.Count == 1)
+                {
+                    SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
+                }
                 break;
             case "Red Wizard":
                 abilityButtonOneText.text = redAbilitiesNames[0] + " towards Yellow Wizard";
                 abilityButtonTwoText.text = redAbilitiesNames[0] + " towards Blue Wizard";
                 abilityButtonThreeText.text = redAbilitiesNames[1];
+                abilityButtonFourText.text = redAbilitiesNames[2];
                 abilityButtonOneInfo.text = "Deal " + redAbilitiesInfo[0].ToString() + " Damage to Yellow Wizard";
                 abilityButtonTwoInfo.text = "Deal " + redAbilitiesInfo[0].ToString() + " Damage to Blue Wizard";
                 abilityButtonThreeInfo.text = "Deal " + redAbilitiesInfo[1].ToString() + " Damage to all others";
+                abilityButtonFourInfo.text = "Heal Self for " + redAbilitiesInfo[2].ToString();
+                // if the player would die, lose
+                if (redHealth <= 0)
+                {
+                    win = false;
+                    SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
+                }
+                // if is the only one left, win
+                if (redHealth > 0 && wizardsList.Count == 1)
+                {
+                    SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
+                }
                 break;
-
         }
-        if (phases == 0)
+        // if a wizard would die, remove it from the game
+        if (yellowHealth <= 0 && yellowWizardAlive == true)
         {
-            activeChar = currentBody;
-            infoText.text = "Choose an ability!";
+            Debug.Log("yellow"+ yellowHealth);
+            yellowWizardAlive = false;
+            wizardToRemove = "Yellow Wizard";
+            BodyDestroy();
         }
-        else if (phases == 1)
+        if (blueHealth <= 0 && blueWizardAlive == true)
         {
-            infoText.text = activeChar + " uses " ;
-            if (timer > 0) 
-            {
-                timer -= Time.deltaTime;
-            }
-
-            if (timer <= 0)
-            {
-                timer = timerLimit;
-                phases = 2;
-            }
+            Debug.Log("blue" + blueHealth);
+            blueWizardAlive = false;
+            wizardToRemove = "Blue Wizard";
+            BodyDestroy();
         }
-        else if (phases == 2)
+        if (redHealth <= 0 && redWizardAlive == true)
         {
-
+            Debug.Log("red" + redHealth);
+            redWizardAlive = false;
+            wizardToRemove = "Red Wizard";
+            BodyDestroy();
         }
     }
     public void UseAbility(int chosenAbility)
     {
-        if (phases == 0)
+        switch (currentBody)
         {
-
-            switch (activeChar)
-            {
-                case "Yellow Wizard":
-                    switch (chosenAbility)
-                    {
-                        case 0:
+            case "Yellow Wizard":
+                switch (chosenAbility)
+                {
+                    case 0:
+                        if (blueWizardAlive == true)
+                        {
                             blueHealth -= yellowAbilitiesInfo[0];
-                            break;
-                        case 1:
+                        }
+                        break;
+                    case 1:
+                        if (redWizardAlive == true)
+                        {
                             redHealth -= yellowAbilitiesInfo[0];
-                            break;
-                        case 2:
+                        }
+                        break;
+                    case 2:
+                        if (blueWizardAlive == true)
+                        {
                             blueHealth -= yellowAbilitiesInfo[1];
+                        }
+                        if (redWizardAlive == true)
+                        {
                             redHealth -= yellowAbilitiesInfo[1];
-                            break;
-                    }
-                    break;
-                case "Blue Wizard":
-                    switch (chosenAbility)
-                    {
-                        case 0:
+                        }
+                        break;
+                    case 3:
+                        yellowHealth += yellowAbilitiesInfo[2];
+                        break;
+                }
+                break;
+            case "Blue Wizard":
+                switch (chosenAbility)
+                {
+                    case 0:
+                        if (yellowWizardAlive == true)
+                        {
                             yellowHealth -= blueAbilitiesInfo[0];
-                            break;
-                        case 1:
+                        }
+                        break;
+                    case 1:
+                        if (redWizardAlive == true)
+                        {
                             redHealth -= blueAbilitiesInfo[0];
-                            break;
-                        case 2:
+                        }
+                        break;
+                    case 2:
+                        if (yellowWizardAlive == true)
+                        {
                             yellowHealth -= blueAbilitiesInfo[1];
+                        }
+                        if (redWizardAlive == true)
+                        {
                             redHealth -= blueAbilitiesInfo[1];
-                            break;
-                    }
-                    break;
-                case "Red Wizard":
-                    switch (chosenAbility)
-                    {
-                        case 0:
+                        }
+                        break;
+                    case 3:
+                        blueHealth += blueAbilitiesInfo[2];
+                        if (blueHealth >= blueMaxHealth)
+                        {
+                            blueHealth = blueMaxHealth;
+                        }
+                        break;
+                }
+                  break;
+            case "Red Wizard":
+                switch (chosenAbility)
+                 {
+                    case 0:
+                        if (yellowWizardAlive == true)
+                        {
                             yellowHealth -= redAbilitiesInfo[0];
-                            break;
-                        case 1:
+                        }
+                        break;
+                    case 1:
+                        if (blueWizardAlive == true)
+                        {
                             blueHealth -= redAbilitiesInfo[0];
-                            break;
-                        case 2:
+                        }
+                        break;
+                    case 2:
+                        if (yellowWizardAlive == true)
+                        {
                             yellowHealth -= redAbilitiesInfo[1];
+                        }
+                        if (blueWizardAlive == true)
+                        {
                             blueHealth -= redAbilitiesInfo[1];
-                            break;
-                    }
-                    break;
-            }
-            timer = timerLimit;
-            Debug.Log(timer+"new");
-            phases = 1;
-        }
+                        }
+                        break;
+                    case 3:
+                        redHealth += redAbilitiesInfo[2];
+                        if (redHealth >= redMaxHealth)
+                        {
+                            redHealth = redMaxHealth;
+                        }
+                        break;
+                }
+                break;
+
+         }
+        NextTurn();
     }
-    public void OthersAbility()
+    public void NextTurn()
     {
-        string[] remainingWizards = { };
-    }
-    public void nextTurn()
-    {
-        // find if need to switch body, if yes, do so
-        turnsBeforeChange -= 1;
-        if (turnsBeforeChange <= 0)
-        {
             currentBody = nextBody;
+            currentBodyNumber = nextBodyNumber;
             findNextBody();
-        }
     }
     public void findNextBody()
     {
-        int nextBodyNumber = Random.Range(0, 3);
-        while (nextBodyNumber == currentBodyNumber)
-        {
-            nextBodyNumber = Random.Range(0, 3);
-        }
+        nextBodyNumber = Random.Range(0, wizardsList.Count);
         nextBody = wizardsList[nextBodyNumber];
     }
-    public void AbilityHappen()
+    public void BodyDestroy()
     {
-
+        Debug.Log("oldCount"+wizardsList.Count);
+        switch (wizardToRemove)
+        {
+            case "Yellow Wizard":
+                yellowHealthText.gameObject.SetActive(false);
+                yellowHealthSlider.gameObject.SetActive(false);
+                Destroy(yellowWizardObject);
+                wizardIndex = wizardsList.IndexOf("Yellow Wizard");
+                // if this wizard is next, the player loses
+                if (nextBody == "Yellow Wizard")
+                {
+                    win = false;
+                    SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
+                }
+                break;
+            case "Blue Wizard":
+                blueHealthText.gameObject.SetActive(false);
+                blueHealthSlider.gameObject.SetActive(false);
+                Destroy(blueWizardObject);
+                wizardIndex = wizardsList.IndexOf("Blue Wizard");
+                // if this wizard is next, the player loses
+                if (nextBody == "Blue Wizard")
+                {
+                    win = false;
+                    SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
+                }
+                break;
+            case "Red Wizard":
+                redHealthText.gameObject.SetActive(false);
+                redHealthSlider.gameObject.SetActive(false);
+                Destroy(redWizardObject);
+                wizardIndex = wizardsList.IndexOf("Red Wizard");
+                // if this wizard is next, the player loses
+                if (nextBody == "Red Wizard")
+                {
+                    win = false;
+                    SceneManager.LoadSceneAsync("End", LoadSceneMode.Single);
+                }
+                break;
+        }
+        Debug.Log("index"+wizardIndex);
+        wizardsList.RemoveAt(wizardIndex);
+        Debug.Log("newCount"+wizardsList.Count);
     }
 }

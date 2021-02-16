@@ -967,12 +967,10 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: You are a mind controlling parasite in the body of an elemental wizard
-    in a group of three elemental wizards. The wizards know that you control one
-    of them but they don't know which one you control, so they are planning to use
-    their powers to destroy one another. You switch bodies each two turns with another
-    one and must use their attacks smartly to stay alive. Your goal is to be in the
-    body of the last wizard standing. You lose if the wizard you are controlling
-    dies.
+    in a group of three elemental wizards. You switch bodies at random intervals
+    with another one and must use their attacks smartly to stay alive. Your goal
+    is to be in the body of the last wizard standing. You lose if the wizard you
+    are controlling or will control next turn dies.
 --- !u!222 &1948670288
 CanvasRenderer:
   m_ObjectHideFlags: 0
